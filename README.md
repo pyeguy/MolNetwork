@@ -41,9 +41,9 @@ Right now things are fairly basic. This is really meant to be a way to vizualize
 
 ###Future Feature Ideas:
 
-*Multiprocessing
-*Networkx / Gephi output support
-*???
+* Multiprocessing
+* Networkx / Gephi output support
+* ???
 
 ###Usage:
 
