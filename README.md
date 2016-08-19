@@ -48,13 +48,10 @@ Right now things are fairly basic. This is really meant to be a way to vizualize
 ###Usage:
 
 #####Basic:
-
 `python MolNetwork.py <infile> <outfile>`
-
 #####With singletons included and a lowered threshold:
-
 `python MolNetwork.py <infile> <outfile> --thresh 0.7 --singletons`
-
 #####Negative SAR option used:
-
 `python MolNetwork.py <infile> <outfile> --negsar <full_library_file>`
+##### Help!:
+`python MolNetwork.py --help`
