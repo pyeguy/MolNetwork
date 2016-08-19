@@ -3,7 +3,7 @@
 ####A tool to genereate a molecular networks
 
 ###Overview:
-This is a command line python tool for generating molecular networks. At the moment this is accomplished using Morgan (circular) feature counts with a radius of 4 bonds. These fingerprints are generated for each input molecule and then pairwise Dice similarity scores are caclulated for all compounds. Those scores which are above the specified cutoff are included as edges in a resulting tab deliminated output edge list file. This can be easily loaded into network visualization software such as cytoscape or gephi.
+This is a command line python tool for generating molecular networks. At the moment this is accomplished using Morgan (circular) feature counts with a radius of 4 bonds. These fingerprints are generated for each input molecule and then pairwise Dice similarity scores are caclulated for all compounds. Those scores which are above the specified cutoff are included as edges in a resulting tab deliminated output edge list file. This can be easily loaded into network visualization software such as [cytoscape](http://www.cytoscape.org/) or [gephi](https://gephi.org/).
 
 ####Dependencies:
 * Written for python 3.5 (it's time to move on all you 2.7 users...)
