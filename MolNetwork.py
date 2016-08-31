@@ -25,6 +25,9 @@ METRICS = {
     'Sokal' : AllChem.DataStructs.SokalSimilarity,
 }
 
+BINARYFPS = {'ECFP4'}
+BINONLYMETRICS = {'Cosine','Sokal'}
+
 def getNummols(infile):
     infile_components = infile.split('.')
     nummols = 0
@@ -183,13 +186,17 @@ if __name__ == '__main__':
     parser.add_argument('--singletons',action='store_true',help='include self-loop for all singletons')
     parser.add_argument('--negsar',help='File with all compounds to be clustered w/hits. will output a second file with hit attaribute')
     parser.add_argument('--fptype',help='the type of fp to be used (these are the Morgan Algo. equivalents)',choices=['ECFC4','ECFP4'],default='ECFC4')
-    parser.add_argument('--metric',help='Distance/Simiarity Metric to use',choices=['DICE','Tanimoto','Cosine'],default='DICE')
+    parser.add_argument('--metric',help='Distance/Simiarity Metric to use',choices=['DICE','Tanimoto','Cosine','Sokal'],default='DICE')
+    parser.add_argument('--nx', help='Output a .gpkl NetworkX graph file',action='store_true')
+    parser.add_argument('--gexf',help='Output a .gexf file which can be read by Gephi or Cytoscape with the gexf-app plugin',action='store_true')
     args = parser.parse_args()
 
     infile_components = args.infile.split('.')
     outfile_components = args.outfile.split('.')
 
-    if args.metric in {'Cosine'} and args.fptype in {'ECFP4'}:
+
+
+    if args.metric in BINONLYMETRICS and args.fptype not in BINARYFPS:
         raise Exception("Unspported Metric and FP combination : <{}> & <{}>".format(args.metric,args.fptype))
 
     fps = genFps(args.infile,args.fptype)
@@ -214,3 +221,12 @@ if __name__ == '__main__':
         print('Source\tTarget\tScore',file=fout)
         for intline in scores:
             print('{}\t{}\t{}'.format(*intline),file=fout)
+    if args.nx or args.gexf:
+        import networkx
+        g = networkx.Graph()
+        ebunch = [(s,t,{'weight':w}) for s,t,w in scores]
+        g.add_edges_from(ebunch)
+        if args.nx:
+            networkx.write_gpickle(g,'{}.gpkl'.format(outfile_components[0]))
+        if args.gexf:
+            networkx.write_gexf(g,'{}.gexf'.format(outfile_components[0]))
