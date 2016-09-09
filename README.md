@@ -55,6 +55,7 @@ Right now things are fairly basic. This is really meant to be a way to vizualize
 ###Future Feature Ideas:
 
 * Multiprocessing
+* Chunking to disk for large datasets
 * suggestions?
 
 ###Usage:
