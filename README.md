@@ -17,7 +17,8 @@ This is a command line python tool for generating molecular networks. At the mom
 
 ###Installation:
 
-Nothing fancy yet. just make sure you have the dependencies installed and it should just run like any other python script. See usage section for a few examples. 
+Nothing fancy yet. Either clone it or download the files and cd into the directory.Just make sure you have the dependencies installed and it should just run like any other python script. See usage section for a few examples. 
+  * if you're feeling fancy you can place the folder in your system path and make a bash or batch script to make it executable in any folder. i'll add the 1-liners at some point to here. 
 
 ###Features:
 
