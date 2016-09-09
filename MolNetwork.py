@@ -1,3 +1,11 @@
+"""A tool for generating networks based on molecular fingerprint similarity"""
+
+
+__author__ = "Cameron Pye"
+__email__ = "cameron.pye@gmail.com"
+__license__ = "GPL"
+__version__ = "0.1"
+__status__ = "beta"
 from rdkit import Chem
 from rdkit.Chem import AllChem
 import progressbar
