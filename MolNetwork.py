@@ -23,6 +23,7 @@ METRICS = {
     'Tanimoto' : AllChem.DataStructs.TanimotoSimilarity,
     'Cosine' : AllChem.DataStructs.CosineSimilarity,
     'Sokal' : AllChem.DataStructs.SokalSimilarity,
+    'Tversky' : AllChem.DataStructs.TverskySimilarity,
 }
 
 BINARYFPS = {'ECFP4'}
@@ -53,11 +54,12 @@ def genMollist(infile):
         suppl = Chem.SDMolSupplier(infile)
         i = 0
         for mol in suppl:
-            i +=1
-            name = mol.GetProp('_Name')
-            if name == '':
-                name = i
-            yield [mol,name]
+            if mol:
+                i +=1
+                name = mol.GetProp('_Name')
+                if name == '':
+                    name = i
+                yield [mol,name]
 
 
 def genFps(infile,fptype):
@@ -80,7 +82,7 @@ def genFps(infile,fptype):
             pickle.dump(fps,fout)
     return fps 
 
-def full_simtable(fps,metric):
+def half_simtable(fps,metric):
     metric_method = METRICS[metric]
     print("Making Sim Table")
     i = 1
@@ -96,6 +98,34 @@ def full_simtable(fps,metric):
                 non_sings.add(name2)
                 scores.append([name1,name2,score])
         i +=1
+    names = set([x[0] for x in fps])
+    sings = names - names.intersection(non_sings)
+    print('\n','-'*80,sep='')
+    print("Percent clustered : {0:.2f}%".format(((len(names)-len(sings))/len(names)*100)))
+    print("Number of Singletons : {}".format(len(sings)))
+    if args.singletons:
+        print("including singletons in edgelist as self loops")
+        scores.extend([[sing,sing,1.0] for sing in sings])
+    return scores
+
+def directed_simtable(fps,weights):
+    metric_method = METRICS['Tversky']
+    print("Making Full Directed Sim Table")
+    i = 1
+    j = 1
+    scores = []
+    non_sings = set()
+    bar = progressbar.ProgressBar()
+    for name1,fp1 in bar(fps):
+        for name2,fp2 in fps:
+            if i != j:
+                score = metric_method(fp1,fp2)
+                if score >= args.thresh:
+                    non_sings.add(name1)
+                    non_sings.add(name2)
+                    scores.append([name1,name2,score])
+            j+=1
+        i+=1
     names = set([x[0] for x in fps])
     sings = names - names.intersection(non_sings)
     print('\n','-'*80,sep='')
@@ -175,8 +205,6 @@ if __name__ == '__main__':
 
         Future Versions Will Include:
             * multiprocessing
-            * richer input output options
-                * networkx / gephi output
             * ...
         '''))
     parser.add_argument('infile',help='input file; smiles file for now')
@@ -186,17 +214,18 @@ if __name__ == '__main__':
     parser.add_argument('--singletons',action='store_true',help='include self-loop for all singletons')
     parser.add_argument('--negsar',help='File with all compounds to be clustered w/hits. will output a second file with hit attaribute')
     parser.add_argument('--fptype',help='the type of fp to be used (these are the Morgan Algo. equivalents)',choices=['ECFC4','ECFP4'],default='ECFC4')
-    parser.add_argument('--metric',help='Distance/Simiarity Metric to use',choices=['DICE','Tanimoto','Cosine','Sokal'],default='DICE')
-    parser.add_argument('--nx', help='Output a .gpkl NetworkX graph file',action='store_true')
-    parser.add_argument('--gexf',help='Output a .gexf file which can be read by Gephi or Cytoscape with the gexf-app plugin',action='store_true')
+    mutex_group1 = parser.add_mutually_exclusive_group()
+    mutex_group1.add_argument('--metric',help='Distance/Simiarity Metric to use',choices=['DICE','Tanimoto','Cosine','Sokal'],default='DICE')
+    mutex_group1.add_argument('--directed',help='Use Tversky scoring to generate directed graph. include when using this option <alpha> <beta>',type=list,default=[0.9,0.1])
+    parser.add_argument('--nx', help='Output a .gpkl NetworkX graph pickle file',action='store_true')
+    parser.add_argument('--gexf',help='Output a .gexf file which can be read by Gephi natively or Cytoscape with the gexf-app plugin',action='store_true')
     args = parser.parse_args()
 
     infile_components = args.infile.split('.')
     outfile_components = args.outfile.split('.')
 
-
-
-    if args.metric in BINONLYMETRICS and args.fptype not in BINARYFPS:
+    if (args.metric in BINONLYMETRICS and args.fptype not in BINARYFPS) or (args.directed and args.fptype not in BINARYFPS):
+        parser.print_help()
         raise Exception("Unspported Metric and FP combination : <{}> & <{}>".format(args.metric,args.fptype))
 
     fps = genFps(args.infile,args.fptype)
@@ -204,7 +233,7 @@ if __name__ == '__main__':
     if args.samplesize:
         scores = sample_scores(fps,args.thresh,args.samplesize,args.metric)
     else:
-        scores = full_simtable(fps,args.metric)
+        scores = half_simtable(fps,args.metric)
 
     if args.negsar:
         neg_sar_scores, neg_sar_names = negSAR(args.negsar,fps,args.metric)
@@ -223,7 +252,10 @@ if __name__ == '__main__':
             print('{}\t{}\t{}'.format(*intline),file=fout)
     if args.nx or args.gexf:
         import networkx
-        g = networkx.Graph()
+        if args.directed:
+            g = networkx.DiGraph()
+        else:
+            g = networkx.Graph()
         ebunch = [(s,t,{'weight':w}) for s,t,w in scores]
         g.add_edges_from(ebunch)
         if args.nx:
