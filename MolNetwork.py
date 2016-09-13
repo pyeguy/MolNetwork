@@ -6,6 +6,7 @@ __email__ = "cameron.pye@gmail.com"
 __license__ = "GPL"
 __version__ = "0.1"
 __status__ = "beta"
+
 from rdkit import Chem
 from rdkit.Chem import AllChem
 import progressbar
@@ -35,7 +36,7 @@ METRICS = {
 }
 
 BINARYFPS = {'ECFP4'}
-BINONLYMETRICS = {'Cosine','Sokal'}
+BINONLYMETRICS = {'Cosine','Sokal','Tversky'}
 
 def getNummols(infile):
     infile_components = infile.split('.')
@@ -224,7 +225,7 @@ if __name__ == '__main__':
     parser.add_argument('--fptype',help='the type of fp to be used (these are the Morgan Algo. equivalents)',choices=['ECFC4','ECFP4'],default='ECFC4')
     mutex_group1 = parser.add_mutually_exclusive_group()
     mutex_group1.add_argument('--metric',help='Distance/Simiarity Metric to use',choices=['DICE','Tanimoto','Cosine','Sokal'],default='DICE')
-    mutex_group1.add_argument('--directed',help='Use Tversky scoring to generate directed graph. include when using this option <alpha> <beta>',type=list,default=[0.9,0.1])
+    mutex_group1.add_argument('--directed',help='Use Tversky scoring to generate directed graph. include when using this option <alpha> <beta>',type=list)
     parser.add_argument('--nx', help='Output a .gpkl NetworkX graph pickle file',action='store_true')
     parser.add_argument('--gexf',help='Output a .gexf file which can be read by Gephi natively or Cytoscape with the gexf-app plugin',action='store_true')
     args = parser.parse_args()
@@ -232,9 +233,14 @@ if __name__ == '__main__':
     infile_components = args.infile.split('.')
     outfile_components = args.outfile.split('.')
 
+
     if (args.metric in BINONLYMETRICS and args.fptype not in BINARYFPS) or (args.directed and args.fptype not in BINARYFPS):
         parser.print_help()
-        raise Exception("Unspported Metric and FP combination : <{}> & <{}>".format(args.metric,args.fptype))
+        print()
+        if args.directed:
+            raise Exception("Unspported Metric and FP combination : for directed use binary Fingerprint ie --fptype ECFP4")
+        else: raise Exception("Unspported Metric and FP combination : <{}> & <{}>".format(args.metric,args.fptype))
+
 
     fps = genFps(args.infile,args.fptype)
     
