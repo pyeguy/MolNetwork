@@ -9,7 +9,7 @@ __status__ = "beta"
 
 from rdkit import Chem
 from rdkit.Chem import AllChem
-import progressbar
+from tqdm import tqdm
 from random import sample
 import pickle
 import argparse
@@ -84,8 +84,7 @@ def genFps(infile,fptype):
         molgen = genMollist(infile)
         print("Making FPs")
         fps = []
-        pbar = progressbar.ProgressBar(max_value=nummols)
-        for mol,name in pbar(molgen):
+        for mol,name in tqdm(molgen,total=nummols,desc="FP Generation"):
             fps.append([name,fpmethod(mol)])
         with open('{}_{}.pkl'.format(infile_components[0],fptype),'wb') as fout:
             pickle.dump(fps,fout)
@@ -97,8 +96,7 @@ def half_simtable(fps,metric):
     i = 1
     scores = []
     non_sings = set()
-    bar = progressbar.ProgressBar()
-    for name1,fp1 in bar(fps):
+    for name1,fp1 in tqdm(fps,desc="PW Distance Mat."):
         for name2,fp2 in fps[i:]:
             # if j > i :
             score = metric_method(fp1,fp2)
@@ -178,9 +176,8 @@ def negSAR(full_filename,hits_fps,metric):
     # full_fps = {name:fp for name,fp in genFps(full_mollist)}
     print('Getting Fingerprints of the full library... ')
     full_fps = genFps(full_filename,args.fptype)
-    pbar = progressbar.ProgressBar()
     print('Making Neg SAR comparisons')
-    for hit_name,hit_fp in pbar(hits_fps):
+    for hit_name,hit_fp in tqdm(hits_fps,desc='SAR Comps.'):
         for neg_name,neg_fp in full_fps:
             if hit_name != neg_name:
                 score = metric_method(hit_fp,neg_fp)

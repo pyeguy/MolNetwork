@@ -11,9 +11,9 @@ This is a command line python tool for generating molecular networks. At the mom
 
   This can be a bit of a pain to install from source. Highly reccommend using the [Annaconda Python](https://www.continuum.io/downloads) distribution and installing using the [conda recipe](http://www.rdkit.org/docs/Install.html).
 
-* [progressbar2](https://pypi.python.org/pypi/progressbar2)
+* [tqdm](https://pypi.python.org/pypi/tqdm)
 
-  There are potentially some long running loops in this program so it's nice to have some idea of when they're going to finish. progressbar2 does a pretty job of it. This is a bit of luxury dependency, might get removed down the line...
+  There are potentially some long running loops in this program so it's nice to have some idea of when they're going to finish. tqdm does a really pretty job of it. 
 
 ### Installation:
 
