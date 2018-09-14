@@ -27,7 +27,7 @@ Right now things are fairly basic. This is really meant to be a way to vizualize
 * Input files can be .smi files or .sd(f) files.
   * .smi file format has lines of : `smiles<tab>name,`
   * .sd or .sdf file will be detected from the extension
-    *if no name attribute is in the sd file then the index will be used as the name for the output
+    * if no name attribute is in the sd file then the index will be used as the name for the output
 * Full Pairwise Similarity Scoring
 
   The default action is to compute all pairwise Dice scores (non-redundant and no self-loops) and output those above the default threshold score of 0.8 though each of these can be changed. 

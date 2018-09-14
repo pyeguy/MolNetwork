@@ -14,6 +14,8 @@ from random import sample
 import pickle
 import argparse
 import textwrap
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from functools import partial
 # import itertools
 # from sys import argv
 # script,infile,outfile = argv
@@ -89,6 +91,10 @@ def genFps(infile,fptype):
         with open('{}_{}.pkl'.format(infile_components[0],fptype),'wb') as fout:
             pickle.dump(fps,fout)
     return fps 
+
+
+def mp_gen_dmat(fps,thresh):
+    pass
 
 def half_simtable(fps,metric):
     metric_method = METRICS[metric]
